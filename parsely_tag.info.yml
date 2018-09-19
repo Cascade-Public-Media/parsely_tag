@@ -7,4 +7,4 @@ configure: parsely_tag.settings
 
 dependencies:
  - drupal:node
- - drupal:token
+ - token:token
