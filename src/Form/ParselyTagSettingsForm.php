@@ -2,8 +2,11 @@
 
 namespace Drupal\parsely_tag\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\UrlGeneratorInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class ParselyTagSettingsForm.
@@ -11,6 +14,37 @@ use Drupal\Core\Form\FormStateInterface;
  * @ingroup parsely_tag
  */
 class ParselyTagSettingsForm extends ConfigFormBase {
+
+  /**
+   * The URL generator.
+   *
+   * @var \Symfony\Component\Routing\Generator\UrlGeneratorInterface
+   */
+  protected $urlGenerator;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('url_generator'),
+      $container->get('config.factory')
+    );
+  }
+
+  /**
+   * Constructs a new ParselyTagSettingsForm object.
+   *
+   * @param \Drupal\Core\Routing\UrlGeneratorInterface $url_generator
+   *   The url generator.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The factory for configuration objects.
+   */
+  public function __construct(UrlGeneratorInterface $url_generator, ConfigFactoryInterface $config_factory) {
+    parent::__construct($config_factory);
+
+    $this->urlGenerator = $url_generator;
+  }
 
   /**
    * {@inheritdoc}
@@ -48,9 +82,11 @@ class ParselyTagSettingsForm extends ConfigFormBase {
       '#type' => 'details',
       '#title' => $this->t('Content Type defaults'),
       '#description' => $this->t('These values wil be used as the defaults
-        for all content types. Visit <a href="@url">Content types</a> to
+        for all content types. Visit <a href="@link">Content types</a> to
         override these defaults for specific content types.', [
-          '@url' => '/admin/structure/types',
+          '@link' => $this->urlGenerator->generateFromRoute(
+            'entity.node_type.collection'
+          ),
         ]),
       '#open' => TRUE,
     ];
